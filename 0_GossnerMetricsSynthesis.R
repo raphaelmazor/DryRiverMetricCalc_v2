@@ -60,7 +60,7 @@ gossner_dispersal<-gossner_df %>%
 
 length(gossner_dispersal$Family)==length(unique(gossner_dispersal$Family))
 ####FEEDING GUILD
-#Short: (h)erbivores, (p)redators, (f)ungivores, (d)etritivores, (o)mnivores
+#Short: (h)erbivores, (p)redators or (c) carnivores, (f)ungivores, (d)etritivores, (o)mnivores
 
 gossner_feedingguildshort<-gossner_df %>%
   group_by(Family, Feeding_guild_short ) %>%
