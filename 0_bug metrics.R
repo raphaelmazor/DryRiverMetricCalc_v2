@@ -8,16 +8,27 @@ meta_arth_df<-read_xlsx("C:/Users/Raphaelm/SCCWRP/Ephemeral Stream Assessment to
 
 
 #Import sampledata
-sample_data<-read_xls("C:/Users/Raphaelm/SCCWRP/Ephemeral Stream Assessment tools - Dry phase bioassessment RCN/Data/4_FullData/Taxonomy/Bug_Data/Edited_RB4_2021_SWAMP_MASTER_Template_RD_DP.xls",
+sample_data<-
+  #RB4 2021
+  read_xls("C:/Users/Raphaelm/SCCWRP/Ephemeral Stream Assessment tools - Dry phase bioassessment RCN/Data/4_FullData/Taxonomy/Bug_Data/Edited_RB4_2021_SWAMP_MASTER_Template_RD_DP.xls",
                       sheet="BenthicResults") %>%
+  #RB9 2021
   bind_rows(
     read_xls("C:/Users/Raphaelm/SCCWRP/Ephemeral Stream Assessment tools - Dry phase bioassessment RCN/Data/4_FullData/Taxonomy/Bug_Data/Edited_RB9_2021_SWAMP_MASTER_Template_RD_DP.xls",
              sheet="BenthicResults")
     
   ) %>%
+  #RB9 202-
+  bind_rows(
+    read_xls("C:/Users/Raphaelm/SCCWRP/Ephemeral Stream Assessment tools - Dry phase bioassessment RCN/Data/4_FullData/Taxonomy/Bug_Data/RB9_2020_Bugs_SWAMP.xls",
+             sheet="BenthicResults")
+    
+  ) %>%
   #Standard format for sample ID generation for arthropod samples
-  mutate(SampleID=paste(StationCode, SampleDate, CollectionMethodCode, Replicate, sep="_"))
+  mutate(SampleID=paste(StationCode, SampleDate, CollectionMethodCode, Replicate, sep="_")) %>%
+  filter(!FinalID %in% c("Gastropoda"))
 
+setdiff(sample_data$FinalID, meta_arth_df$FinalID)
 
 arth_tax<-c("STE1_ID","TaxonomicLevelCode",
             "Class","Subclass","Order","Suborder","Superfamily","Family","Subfamily","Tribe","Genus","Species"
@@ -58,11 +69,11 @@ generate_sample_id<-function(x){
 
 sample_data %>%
   select(SampleID,StationCode, SampleDate, CollectionMethodCode, Replicate, FinalID, Result) %>%
-  left_join(meta_arth_df) %>%
+  left_join(meta_arth_df, relationship="many-to-one") %>%
   group_by(SampleID,StationCode, SampleDate, CollectionMethodCode, Replicate, STE1_ID) %>%
   summarise(Result=sum(Result)) %>%
   ungroup()  %>%
-  left_join(arth_taxa_long)
+  left_join(arth_taxa_long, relationship="many-to-many")
 
 
 meta_arth_df %>%
